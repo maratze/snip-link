@@ -1,0 +1,99 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String        @id @default(uuid())
+  email        String        @unique
+  password     String
+  name         String
+  plan         Plan          @default(FREE)
+  links        Link[]
+  domains      Domain[]
+  teamUsers    TeamUser[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  teamId       String?
+  team         Team?         @relation(fields: [teamId], references: [id])
+  Subscription Subscription?
+
+  @@map("users")
+}
+
+model Link {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  originalUrl  String
+  shortUrl     String   @unique
+  customAlias  String?
+  customDomain String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  clicks       Click[]
+
+  @@map("links")
+}
+
+model Click {
+  id        String   @id @default(uuid())
+  linkId    String
+  link      Link     @relation(fields: [linkId], references: [id])
+  timestamp DateTime @default(now())
+  ipAddress String? // Анонимизированный IP-адрес
+  referrer  String?
+  userAgent String?
+
+  @@map("clicks")
+}
+
+model Domain {
+  id         String  @id @default(uuid())
+  userId     String
+  user       User    @relation(fields: [userId], references: [id])
+  domain     String  @unique
+  isVerified Boolean @default(false)
+
+  @@map("domains")
+}
+
+model Team {
+  id    String     @id @default(uuid())
+  name  String
+  users TeamUser[]
+  User  User[]
+
+  @@map("teams")
+}
+
+model TeamUser {
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+  teamId String
+  team   Team   @relation(fields: [teamId], references: [id])
+
+  @@id([userId, teamId])
+  @@map("team_users")
+}
+
+enum Plan {
+  FREE
+  PRO
+  BUSINESS
+}
+
+model Subscription {
+  id        String    @id @default(uuid())
+  userId    String    @unique
+  user      User      @relation(fields: [userId], references: [id])
+  plan      Plan      @default(FREE)
+  startDate DateTime  @default(now())
+  endDate   DateTime?
+
+  @@map("subscriptions")
+}
