@@ -3,37 +3,45 @@ import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 
 export default defineNuxtConfig({
     modules: [
-        '@sidebase/nuxt-auth',
+        ['@sidebase/nuxt-auth', {
+            baseURL: process.env.AUTH_ORIGIN || 'http://localhost:3000',
+            provider: {
+                type: 'local',
+                endpoints: {
+                    session: {
+                        path: '/api/auth/session',
+                    },
+                },
+            },
+        }],
         '@vueuse/nuxt',
+        async (options, nuxt) => {
+            nuxt.hooks.hook('vite:extendConfig', (config) => {
+                config.plugins?.push(vuetify({ autoImport: true }))
+            })
+        }
     ],
 
-    auth: {
-        isEnabled: true,
-        globalAppMiddleware: true,
-        baseURL: process.env.AUTH_ORIGIN || 'http://localhost:3000'
+    runtimeConfig: {
+        auth: {
+            isEnabled: true,
+            globalAppMiddleware: true,
+        },
+        csrf: {
+            cookieKey: 'x-csrf-token',
+            headerKey: 'x-csrf-token',
+            https: process.env.NODE_ENV === 'production'
+        },
     },
 
-    csrf: {
-        cookieKey: 'x-csrf-token',
-        headerKey: 'x-csrf-token',
-        https: process.env.NODE_ENV === 'production'
-    },
-
-    middleware: ['auth', 'rateLimit', 'securityHeaders'],
-
-    // Enable vueuse
-    vueuse: {
-        ssrHandlers: true,
-    },
-
-    // Enable vuetify
     build: {
-        transpile: ['vuetify'], // Make sure this is here
+        transpile: ['vuetify'],
     },
 
     css: [
-        'vuetify/styles',
         '@mdi/font/css/materialdesignicons.min.css',
+        'vuetify/styles',
+        '~/assets/main.css'
     ],
 
     vite: {
@@ -44,41 +52,6 @@ export default defineNuxtConfig({
         },
         define: {
             'process.env.DEBUG': false,
-        },
-    },
-
-    // Vuetify theme configuration
-    vuetify: {
-        theme: {
-            defaultTheme: 'light',
-            themes: {
-                light: {
-                    colors: {
-                        primary: '#673AB7',
-                        secondary: '#FF4081',
-                        accent: '#7C4DFF',
-                        error: '#FF5252',
-                        info: '#2196F3',
-                        success: '#4CAF50',
-                        warning: '#FFC107',
-                        background: '#FAFAFA',
-                        text: '#212121',
-                    },
-                },
-                dark: {
-                    colors: {
-                        primary: '#2196F3',
-                        secondary: '#BB86FC',
-                        accent: '#82B1FF',
-                        error: '#FF5252',
-                        info: '#2196F3',
-                        success: '#4CAF50',
-                        warning: '#FFC107',
-                        background: '#303030',
-                        text: '#FAFAFA',
-                    },
-                },
-            },
         },
     },
 

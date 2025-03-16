@@ -1,0 +1,21 @@
+:root {
+    --v-primary-base: #673AB7;
+    --v-secondary-base: #FF4081;
+    --v-accent-base: #7C4DFF;
+    --v-error-base: #FF5252;
+    --v-info-base: #2196F3;
+    --v-success-base: #4CAF50;
+    --v-warning-base: #FFC107;
+    --v-background-lighten1: #F5F5F5; /* Lighten version of background */
+    --v-text-primary: #212121; /* Primary text color */
+    --v-text-secondary: #757575; /* Secondary text color */
+    --v-text-disabled: #BDBDBD; /* Disabled text color */
+}
+
+/* Dark theme variables (optional) */
+.theme--dark {
+    --v-background-base: #303030;
+    --v-text-primary: #FAFAFA;
+    --v-text-secondary: #BDBDBD;
+    --v-text-disabled: #757575;
+}

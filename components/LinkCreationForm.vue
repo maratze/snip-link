@@ -9,13 +9,24 @@
 					type="url"
 					required
 					variant="outlined"
+					color="primary"
 				></v-text-field>
 				<v-text-field
 					v-model="customAlias"
 					label="Custom Alias (optional)"
 					variant="outlined"
+					color="primary"
 				></v-text-field>
-				<v-btn type="submit" color="primary" class="shorten-button">Shorten</v-btn>
+				<v-btn
+					type="submit"
+					color="primary"
+					class="shorten-button"
+					:loading="isLoading"
+					:disabled="isLoading"
+				>
+					<v-icon start>mdi-link</v-icon>
+					{{ isLoading ? 'Shortening...' : 'Shorten' }}
+				</v-btn>
 			</v-form>
 			<div v-if="shortUrl" class="shortened-link">
 				<p>
@@ -26,7 +37,13 @@
 					</v-btn>
 				</p>
 				<v-alert type="success" v-if="copySuccess">Copied!</v-alert>
-				<a :href="originalUrl" target="_blank" rel="noopener noreferrer" class="preview-link">Preview</a>
+				<a
+					:href="originalUrl"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="preview-link"
+				>Preview</a
+				>
 			</div>
 			<v-alert type="error" v-if="errorMessage">{{ errorMessage }}</v-alert>
 		</v-card-text>
@@ -35,16 +52,19 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { LinkResponse } from '../types/link';
 
 const originalUrl = ref<string>('');
 const customAlias = ref<string>('');
 const shortUrl = ref<string>('');
 const errorMessage = ref<string>('');
 const copySuccess = ref<boolean>(false);
+const isLoading = ref<boolean>(false);
 
 const createLink = async () => {
+	isLoading.value = true;
 	try {
-		const response: LinkResponse = await $fetch('/api/links/create', { 
+		const response = await $fetch<LinkResponse>('/api/links/create', {
 			method: 'POST',
 			body: {
 				originalUrl: originalUrl.value,
@@ -56,18 +76,21 @@ const createLink = async () => {
 	} catch (error: any) {
 		errorMessage.value = error.message || 'Something went wrong';
 		shortUrl.value = '';
+	} finally {
+		isLoading.value = false;
 	}
 };
 
 const copyToClipboard = () => {
-	navigator.clipboard.writeText(shortUrl.value)
+	navigator.clipboard
+		.writeText(shortUrl.value)
 		.then(() => {
 			copySuccess.value = true;
 			setTimeout(() => {
 				copySuccess.value = false;
 			}, 2000);
 		})
-		.catch(err => {
+		.catch((err) => {
 			console.error('Failed to copy: ', err);
 			alert('Failed to copy URL. Please copy manually.');
 		});
@@ -78,24 +101,36 @@ const copyToClipboard = () => {
 .link-form {
 	max-width: 600px;
 	margin: 0 auto;
+	border-radius: 16px;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .headline {
 	font-size: 2rem;
 	font-weight: 500;
+	color: var(--v-primary-base);
 }
 
 .shorten-button {
 	margin-top: 16px;
+	border-radius: 8px;
 }
 
 .shortened-link {
 	margin-top: 16px;
+	padding: 16px;
+	background-color: var(--v-background-lighten1);
+	border-radius: 8px;
 }
 
 .link {
-	color: #1867C0;
+	color: var(--v-secondary-base);
 	text-decoration: none;
+	transition: color 0.2s ease-in-out;
+}
+
+.link:hover {
+	color: var(--v-primary-base);
 }
 
 .copy-button {
@@ -105,7 +140,12 @@ const copyToClipboard = () => {
 .preview-link {
 	margin-top: 8px;
 	display: block;
-	color: #5CBBF6;
+	color: var(--v-primary-base);
 	text-decoration: none;
+	transition: color 0.2s ease-in-out;
+}
+
+.preview-link:hover {
+	color: var(--v-secondary-base);
 }
 </style>
