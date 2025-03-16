@@ -2,7 +2,7 @@ import { defineEventHandler, sendError, createError } from 'h3';
 import { RateLimiterMemory } from 'rate-limiter-flexible';
 
 const rateLimiter = new RateLimiterMemory({
-  points: 5, // 5 requests
+  points: 500, // 5 requests
   duration: 10, // per 10 seconds
 });
 

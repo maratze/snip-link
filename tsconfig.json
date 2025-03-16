@@ -1,0 +1,6 @@
+{
+  "compilerOptions": {
+    "types": ["@nuxt/types", "@vue/runtime-core"]
+  },
+  "exclude": ["node_modules"]
+}
