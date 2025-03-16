@@ -1,6 +1,5 @@
 import { defineEventHandler, getHeader } from 'h3';
 import jwt from 'jsonwebtoken';
-
 export default defineEventHandler((event) => {
   const token = getHeader(event, 'Authorization')?.split(' ')[1];
 
